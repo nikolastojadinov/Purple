@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PurpleBeats - Mobile Music Streaming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "sans-serif"],
+                },
+                animation: {
+                    'spin-slow': 'spin 8s linear infinite',
+                    'pulse-slow': 'pulse 3s infinite',
+                    'bounce-subtle': 'bounce 2s infinite',
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(240 10% 4%);
+            --foreground: hsl(0 0% 98%);
+            --card: hsl(240 10% 8%);
+            --card-foreground: hsl(0 0% 95%);
+            --primary: hsl(261 83% 58%);
+            --primary-foreground: hsl(0 0% 98%);
+            --secondary: hsl(240 4% 16%);
+            --secondary-foreground: hsl(0 0% 95%);
+            --muted: hsl(240 4% 16%);
+            --muted-foreground: hsl(240 4% 46%);
+            --accent: hsl(43 96% 56%);
+            --accent-foreground: hsl(240 10% 4%);
+            --border: hsl(240 6% 20%);
+            --input: hsl(240 6% 20%);
+            --ring: hsl(261 83% 58%);
+            --radius: 12px;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            overflow-x: hidden;
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .music-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+        
+        .album-glow {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
+        }
+        
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        
+        .equalizer-bar {
+            width: 3px;
+            background: var(--accent);
+            margin: 0 1px;
+            animation: equalizer 1.5s ease-in-out infinite;
+        }
+        
+        .equalizer-bar:nth-child(2) { animation-delay: 0.1s; }
+        .equalizer-bar:nth-child(3) { animation-delay: 0.2s; }
+        .equalizer-bar:nth-child(4) { animation-delay: 0.3s; }
+        
+        @keyframes equalizer {
+            0%, 100% { height: 8px; }
+            50% { height: 20px; }
+        }
+        
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scroll-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground min-h-screen">
+    <!-- @COMPONENT: MobileApp -->
+    <div class="max-w-md mx-auto bg-background min-h-screen relative">
+        
+        <!-- @COMPONENT: Header -->
+        <header class="px-4 pt-12 pb-4 bg-background/90 backdrop-blur-sm sticky top-0 z-40">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full music-gradient flex items-center justify-center">
+                        <i class="fas fa-music text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        PurpleBeats
+                    </h1>
+                </div>
+                <button class="p-2 rounded-full bg-card hover:bg-secondary transition-colors">
+                    <i class="fas fa-user text-muted-foreground"></i>
+                </button>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="relative">
+                <input 
+                    type="text" 
+                    placeholder="Search songs, artists, albums..."
+                    class="w-full bg-card border border-border rounded-full px-4 py-3 pl-12 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground"></i>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <!-- @COMPONENT: MainContent -->
+        <main class="px-4 pb-32">
+            
+            <!-- Recently Played Section -->
+            <section class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold">Recently Played</h2>
+                    <button class="text-accent text-sm font-medium">See all</button>
+                </div>
+                
+                <div class="flex space-x-4 overflow-x-auto scroll-hide pb-2">
+                    <!-- @MAP: recentlyPlayed.map(item => ( -->
+                    <div class="flex-shrink-0">
+                        <!-- Modern electronic music album cover with neon purple and gold lighting -->
+                        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300" 
+                             alt="Electronic Vibes Album" 
+                             class="w-32 h-32 rounded-lg object-cover album-glow" />
+                        <p class="text-sm font-medium mt-2 w-32 truncate">Electronic Vibes</p>
+                        <p class="text-xs text-muted-foreground truncate">Synthwave Collective</p>
+                    </div>
+                    
+                    <div class="flex-shrink-0">
+                        <!-- Hip hop artist performing on stage with purple stage lighting -->
+                        <img src="https://pixabay.com/get/g310b8fb683979384f237b392efff15cd65cd971d5a9b985db25eecaf5fa96c10902ed941a007fa67d2da1f4ed8c779c13e2889b6b80f217cb352e70576b4a302_1280.jpg" 
+                             alt="Urban Beats Album" 
+                             class="w-32 h-32 rounded-lg object-cover" />
+                        <p class="text-sm font-medium mt-2 w-32 truncate">Urban Beats</p>
+                        <p class="text-xs text-muted-foreground truncate">MC Purple Gold</p>
+                    </div>
+                    
+                    <div class="flex-shrink-0">
+                        <!-- Indie rock band album artwork with dreamy purple hues -->
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300" 
+                             alt="Indie Dreams Album" 
+                             class="w-32 h-32 rounded-lg object-cover" />
+                        <p class="text-sm font-medium mt-2 w-32 truncate">Indie Dreams</p>
+                        <p class="text-xs text-muted-foreground truncate">The Violet Sounds</p>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="mb-8">
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="bg-card rounded-lg p-4 flex items-center space-x-3 hover:bg-secondary transition-colors">
+                        <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-heart text-primary"></i>
+                        </div>
+                        <span class="font-medium">Liked Songs</span>
+                    </button>
+                    
+                    <button class="bg-card rounded-lg p-4 flex items-center space-x-3 hover:bg-secondary transition-colors">
+                        <div class="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-download text-accent"></i>
+                        </div>
+                        <span class="font-medium">Downloads</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Made For You -->
+            <section class="mb-8">
+                <h2 class="text-lg font-semibold mb-4">Made For You</h2>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3 bg-card rounded-lg p-3 hover:bg-secondary transition-colors">
+                        <!-- Personalized playlist cover with music visualization -->
+                        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" 
+                             alt="Daily Mix playlist" 
+                             class="w-12 h-12 rounded-lg object-cover" />
+                        <div class="flex-1">
+                            <p class="font-medium">Daily Mix 1</p>
+                            <p class="text-sm text-muted-foreground">Your daily dose of favorites</p>
+                        </div>
+                        <div class="flex space-x-1">
+                            <div class="equalizer-bar"></div>
+                            <div class="equalizer-bar"></div>
+                            <div class="equalizer-bar"></div>
+                            <div class="equalizer-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3 bg-card rounded-lg p-3 hover:bg-secondary transition-colors">
+                        <!-- Discover weekly playlist with abstract musical elements -->
+                        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" 
+                             alt="Discover Weekly playlist" 
+                             class="w-12 h-12 rounded-lg object-cover" />
+                        <div class="flex-1">
+                            <p class="font-medium">Discover Weekly</p>
+                            <p class="text-sm text-muted-foreground">Fresh finds for you</p>
+                        </div>
+                        <button class="text-primary">
+                            <i class="fas fa-play-circle text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3 bg-card rounded-lg p-3 hover:bg-secondary transition-colors">
+                        <!-- Release radar with new music albums -->
+                        <img src="https://images.unsplash.com/photo-1496024840928-4c417adf211d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" 
+                             alt="Release Radar playlist" 
+                             class="w-12 h-12 rounded-lg object-cover" />
+                        <div class="flex-1">
+                            <p class="font-medium">Release Radar</p>
+                            <p class="text-sm text-muted-foreground">New releases from your artists</p>
+                        </div>
+                        <button class="text-muted-foreground">
+                            <i class="fas fa-plus-circle text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Trending Now -->
+            <section class="mb-8">
+                <h2 class="text-lg font-semibold mb-4">Trending Now</h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- @MAP: trendingAlbums.map(album => ( -->
+                    <div class="bg-card rounded-lg p-4 hover:bg-secondary transition-colors">
+                        <!-- Pop music album cover with vibrant colors -->
+                        <img src="https://images.unsplash.com/photo-1487180144351-b8472da7d491?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300" 
+                             alt="Pop Hits Album" 
+                             class="w-full aspect-square rounded-lg object-cover mb-3" />
+                        <h3 class="font-medium truncate">Pop Hits 2024</h3>
+                        <p class="text-sm text-muted-foreground truncate">Various Artists</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-play text-accent text-xs"></i>
+                                <span class="text-xs text-muted-foreground">2.1M plays</span>
+                            </div>
+                            <button class="text-primary">
+                                <i class="fas fa-heart text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-card rounded-lg p-4 hover:bg-secondary transition-colors">
+                        <!-- Alternative rock album with dark aesthetic -->
+                        <img src="https://pixabay.com/get/g93915f8b831ef7b43beec27e07bc7c99b7dd180fc059395000f0af2efb51e108e9bdcad81421b7e4bcd1efcf8a4a2f272189dd8de4cf4dfee7eebe780bf6f04e_1280.jpg" 
+                             alt="Alternative Rock Album" 
+                             class="w-full aspect-square rounded-lg object-cover mb-3" />
+                        <h3 class="font-medium truncate">Alternative Edge</h3>
+                        <p class="text-sm text-muted-foreground truncate">Rock Rebels</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-play text-accent text-xs"></i>
+                                <span class="text-xs text-muted-foreground">897K plays</span>
+                            </div>
+                            <button class="text-muted-foreground">
+                                <i class="fas fa-heart text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+
+            <!-- Your Library -->
+            <section>
+                <h2 class="text-lg font-semibold mb-4">Your Library</h2>
+                
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-card transition-colors">
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                            <i class="fas fa-music text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium">My Playlist #1</p>
+                            <p class="text-sm text-muted-foreground">23 songs</p>
+                        </div>
+                        <button class="text-muted-foreground">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-card transition-colors">
+                        <!-- Jazz music album with saxophone -->
+                        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" 
+                             alt="Jazz Essentials" 
+                             class="w-12 h-12 rounded-lg object-cover" />
+                        <div class="flex-1">
+                            <p class="font-medium">Jazz Essentials</p>
+                            <p class="text-sm text-muted-foreground">Downloaded • 47 songs</p>
+                        </div>
+                        <button class="text-muted-foreground">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <!-- @END_COMPONENT: MainContent -->
+
+        <!-- @COMPONENT: NowPlayingBar -->
+        <div class="fixed bottom-20 left-0 right-0 px-4 z-30">
+            <div class="max-w-md mx-auto bg-card/95 backdrop-blur-lg rounded-xl p-3 border border-border/50 shadow-2xl">
+                <div class="flex items-center space-x-3">
+                    <!-- Currently playing album art -->
+                    <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" 
+                         alt="Now Playing - Electronic Vibes" 
+                         class="w-12 h-12 rounded-lg object-cover animate-spin-slow" />
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate">Midnight Pulse</p>
+                        <p class="text-sm text-muted-foreground truncate">Synthwave Collective</p>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button class="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="p-2 text-foreground hover:text-accent transition-colors">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="mt-3">
+                    <div class="w-full bg-border rounded-full h-1">
+                        <div class="bg-primary h-1 rounded-full w-2/5 transition-all duration-300"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>2:14</span>
+                        <span>4:32</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: NowPlayingBar -->
+
+        <!-- @COMPONENT: BottomNavigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border safe-area-bottom">
+            <div class="max-w-md mx-auto flex justify-around py-2">
+                <button class="flex flex-col items-center py-2 px-3 text-primary">
+                    <i class="fas fa-home text-xl mb-1"></i>
+                    <span class="text-xs font-medium">Home</span>
+                </button>
+                <button class="flex flex-col items-center py-2 px-3 text-muted-foreground hover:text-foreground transition-colors">
+                    <i class="fas fa-search text-xl mb-1"></i>
+                    <span class="text-xs">Search</span>
+                </button>
+                <button class="flex flex-col items-center py-2 px-3 text-muted-foreground hover:text-foreground transition-colors">
+                    <i class="fas fa-book text-xl mb-1"></i>
+                    <span class="text-xs">Library</span>
+                </button>
+                <button class="flex flex-col items-center py-2 px-3 text-muted-foreground hover:text-foreground transition-colors">
+                    <i class="fas fa-podcast text-xl mb-1"></i>
+                    <span class="text-xs">Podcasts</span>
+                </button>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: BottomNavigation -->
+    </div>
+    <!-- @END_COMPONENT: MobileApp -->
+
+    <script>
+        // TODO: Implement music player functionality
+        // TODO: Add search functionality
+        // TODO: Implement playlist management
+        // TODO: Add audio streaming capabilities
+        // TODO: Implement user authentication
+        // TODO: Add offline downloads functionality
+        
+        (function() {
+            // Simple UI interactions for demo purposes
+            document.addEventListener('DOMContentLoaded', function() {
+                // Simulate playing state
+                const playButtons = document.querySelectorAll('.fas.fa-play, .fas.fa-pause');
+                playButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (this.classList.contains('fa-play')) {
+                            this.classList.remove('fa-play');
+                            this.classList.add('fa-pause');
+                        } else {
+                            this.classList.remove('fa-pause');
+                            this.classList.add('fa-play');
+                        }
+                    });
+                });
+
+                // Heart button toggle
+                const heartButtons = document.querySelectorAll('.fas.fa-heart');
+                heartButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (this.style.color === 'rgb(139, 92, 246)' || this.style.color === 'var(--primary)') {
+                            this.style.color = '';
+                        } else {
+                            this.style.color = 'var(--primary)';
+                        }
+                    });
+                });
+
+                // Search input focus effects
+                const searchInput = document.querySelector('input[type="text"]');
+                if (searchInput) {
+                    searchInput.addEventListener('focus', function() {
+                        this.parentElement.classList.add('ring-2', 'ring-primary');
+                    });
+                    
+                    searchInput.addEventListener('blur', function() {
+                        this.parentElement.classList.remove('ring-2', 'ring-primary');
+                    });
+                }
+
+                // Bottom navigation active state
+                const navButtons = document.querySelectorAll('nav button');
+                navButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        navButtons.forEach(btn => {
+                            btn.classList.remove('text-primary');
+                            btn.classList.add('text-muted-foreground');
+                        });
+                        this.classList.remove('text-muted-foreground');
+                        this.classList.add('text-primary');
+                    });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

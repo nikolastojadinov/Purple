@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PurpleBeats - Music Streaming</title>
+  <meta name="theme-color" content="#6c5ce7" />
+  <link rel="icon" href="/favicon.ico" />
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  
+  <script>
+    // PurpleBeats Pi SDK initialization
+    (function () {
+      const currentDomain = window.location.hostname;
+      console.log("🎵 PurpleBeats initializing Pi SDK...");
+      console.log("🌐 Current domain:", currentDomain);
+
+      // Wait for Pi SDK to be available
+      function waitForPiSDK(callback, maxAttempts = 50) {
+        let attempts = 0;
+        
+        function checkPi() {
+          attempts++;
+          
+          if (typeof window.Pi !== 'undefined' && window.Pi && typeof window.Pi.init === 'function') {
+            console.log("✅ Pi SDK detected for PurpleBeats after", attempts, "attempts");
+            callback();
+            return;
+          }
+          
+          if (attempts >= maxAttempts) {
+            console.error("❌ Pi SDK failed to load for PurpleBeats");
+            return;
+          }
+          
+          console.log("⏳ Waiting for Pi SDK... attempt", attempts);
+          setTimeout(checkPi, 200);
+        }
+        
+        checkPi();
+      }
+
+      function initPurpleBeatsPi(appId) {
+        try {
+          // Determine environment
+          const isLocalhost = currentDomain.includes('localhost') || currentDomain.includes('127.0.0.1') || currentDomain.includes('replit');
+          const isDevelopment = isLocalhost || currentDomain.includes('replit') || currentDomain.includes('.app');
+          
+          const piConfig = {
+            version: "2.0",
+            sandbox: true, // Force testnet for PurpleBeats development
+            appId: appId
+          };
+          
+          console.log("🔧 Initializing PurpleBeats Pi SDK with config:", piConfig);
+          console.log("🔧 Domain:", currentDomain, "isDevelopment:", isDevelopment);
+          console.log("🔧 Sandbox mode (testnet):", piConfig.sandbox);
+          
+          window.Pi.init(piConfig);
+          window.Pi.initialized = true;
+          
+          console.log("✅ PurpleBeats Pi SDK initialized successfully");
+          console.log("🎯 Pi SDK ready for PurpleBeats authentication and payments");
+          console.log("💰 Payment mode: TESTNET (sandbox: true)");
+          
+          // Add Pi methods to global scope for easy access
+          window.PurpleBeats = {
+            piLogin: async () => {
+              if (!window.Pi) throw new Error("Pi SDK not loaded");
+              return await window.Pi.authenticate(["username", "payments"]);
+            },
+            piPayment: async (amount, memo, metadata) => {
+              if (!window.Pi) throw new Error("Pi SDK not loaded");
+              return await window.Pi.createPayment({
+                amount: amount,
+                memo: memo,
+                metadata: metadata
+              });
+            }
+          };
+          
+        } catch (e) {
+          console.error("❌ PurpleBeats Pi.init error:", e);
+        }
+      }
+
+      // Fetch config and initialize
+      fetch("/api/pi-config")
+        .then((res) => {
+          console.log("📡 PurpleBeats Pi config status:", res.status);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((config) => {
+          const appId = config && config.appId;
+          console.log("🔧 PurpleBeats Pi Config received:", config);
+          
+          if (!appId) {
+            throw new Error("Missing appId in Pi config for PurpleBeats");
+          }
+          
+          // Wait for Pi SDK then initialize
+          waitForPiSDK(() => {
+            initPurpleBeatsPi(appId);
+          });
+        })
+        .catch((err) => {
+          console.error("❌ PurpleBeats Pi config failed:", err);
+        });
+    })();
+  </script>
+  
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

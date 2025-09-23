@@ -1,0 +1,83 @@
+Napravite React aplikaciju koja koristi Pi SDK login i deployujte je na Replit sa domenom purplebeats.org.  
+Sve podesite tačno ovako:
+
+1. U package.json zamenite "scripts" sekciju ovim kodom:
+
+"scripts": {
+  "start": "serve -s build",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+}
+
+2. Instalirajte serve paket:
+npm install --save serve
+
+3. U public/index.html stavite sledeći sadržaj:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PurpleBeats</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+</body>
+</html>
+
+4. U src/App.js stavite sledeći sadržaj:
+
+import React, { useState } from "react";
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
+
+  const handleLogin = () => {
+    if (!window.Pi) {
+      setError("❌ Pi SDK not loaded. Open in Pi Browser.");
+      return;
+    }
+    window.Pi.authenticate(
+      ["username"],
+      (auth) => {
+        setUser(auth.user);
+        setError("");
+      },
+      (err) => setError("Error: " + JSON.stringify(err))
+    );
+  };
+
+  return (
+    <div style={{textAlign:"center",marginTop:"3rem",fontFamily:"sans-serif"}}>
+      <h1>PurpleBeats Pi Login Test</h1>
+      {user ? (
+        <p>✅ Logged in as <strong>@{user.username}</strong></p>
+      ) : (
+        <button
+          onClick={handleLogin}
+          style={{padding:"10px 20px",background:"gold",border:"none",borderRadius:"6px",fontWeight:"bold"}}
+        >
+          Login with Pi
+        </button>
+      )}
+      {error && <p style={{color:"red"}}>{error}</p>}
+    </div>
+  );
+}
+
+export default App;
+
+5. U Replit Publishing settings podesite:
+
+Build command:
+npm run build
+
+Run command:
+npm start
+
+6. Deployujte aplikaciju i otvorite https://purplebeats.org u Pi Browseru.  
+Na klik "Login with Pi" treba da se prikaže JSON sa vašim Pi username-om i accessToken-om.
