@@ -77,14 +77,21 @@ const MusicGallery: React.FC = () => {
 
   return (
     <div className="flex flex-row space-x-4 overflow-x-scroll snap-x snap-mandatory py-4 px-2 bg-black">
-      {tracks.map((track, idx) => (
-        <div key={track.name} className={coverWidth + " snap-center"}>
-          <TrackItem
-            song={toSongWithDetails(track, idx)}
-            showEqualizer={true}
-          />
-        </div>
-      ))}
+      {tracks.map((track, idx) => {
+        const song = toSongWithDetails(track, idx);
+        return (
+          <div
+            key={track.name}
+            className={coverWidth + " snap-center cursor-pointer"}
+            onClick={() => musicPlayer.playSong(song)}
+          >
+            <TrackItem
+              song={song}
+              showEqualizer={true}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };
