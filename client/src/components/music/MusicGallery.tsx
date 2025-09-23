@@ -83,12 +83,7 @@ export default function MusicGallery() {
   return (
     <div className="flex flex-row space-x-4 overflow-x-scroll snap-x snap-mandatory py-4 px-2 bg-black">
       {tracks.map((track, idx) => (
-        <div
-          key={idx}
-          className="flex flex-col items-center flex-shrink-0 snap-start cursor-pointer"
-          style={{ width: 'calc(100vw / 3.2)', maxWidth: '16rem', minWidth: '8rem' }}
-          onClick={() => playSong(toSongWithDetails(track, idx))}
-        >
+
           <TrackItem
             song={toSongWithDetails(track, idx)}
             showEqualizer={true}
