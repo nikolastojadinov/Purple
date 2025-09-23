@@ -1,0 +1,11 @@
+# Netlify Configuration for Purple
+
+[build]
+  command = "npm run build"
+  publish = "dist/public"
+
+# Optional: Redirect all requests to index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
