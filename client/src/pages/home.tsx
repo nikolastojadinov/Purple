@@ -3,6 +3,7 @@ import { Heart, Play, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import Header from "@/components/layout/header";
+import MusicGallery from "@/components/music/MusicGallery";
 import TrackItem from "@/components/music/track-item";
 import AlbumCard from "@/components/music/album-card";
 import PlaylistItem from "@/components/music/playlist-item";
@@ -117,55 +118,18 @@ export default function Home() {
       <main className="px-4 pb-44">
         
 
-        {/* Recently Played Section */}
+        {/* Recently Played Section - Supabase MusicGallery */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Recently Played</h2>
           </div>
-          
-          <div className="flex space-x-4 overflow-x-auto scroll-hide pb-2">
-            {recentLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0">
-                  <Skeleton className="w-32 h-32 rounded-lg" />
-                  <Skeleton className="h-4 w-24 mt-2" />
-                  <Skeleton className="h-3 w-20 mt-1" />
-                </div>
-              ))
-            ) : (
-              recentSongs?.slice(0, 8).map((song) => (
-                <RecentSongCard key={song.id} song={song} />
-              ))
-            )}
-          </div>
+          <MusicGallery />
         </section>
 
-        {/* Made For You */}
+        {/* Made For You - Supabase MusicGallery */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-4">Made For You</h2>
-          
-          <div className="space-y-3">
-            {playlistsLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center space-x-3 bg-card rounded-lg p-3">
-                  <Skeleton className="w-12 h-12 rounded-lg" />
-                  <div className="flex-1">
-                    <Skeleton className="h-4 w-32 mb-1" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </div>
-              ))
-            ) : (
-              playlists?.map((playlist) => (
-                <PlaylistItem
-                  key={playlist.id}
-                  playlist={playlist}
-                  onClick={() => handlePlaylistClick(playlist.id)}
-                  onPlay={() => handlePlaylistPlay(playlist.id)}
-                />
-              ))
-            )}
-          </div>
+          <MusicGallery />
         </section>
 
         {/* Trending Now */}
