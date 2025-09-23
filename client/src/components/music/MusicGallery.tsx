@@ -1,10 +1,11 @@
 
+
 import React, { useEffect, useState } from 'react';
-// Helyes elérési út és típusdefiníciók
 import { fetchMusicWithCovers } from '../../../../src/fetchMusicWithCovers';
+import TrackItem from './track-item';
+import { useMusicPlayer } from '@/contexts/music-player-context';
 
 
-type Track = {
   audio: string;
   cover: string;
   name: string;
@@ -33,22 +34,51 @@ export default function MusicGallery() {
     });
   }, []);
 
+
   if (loading) return <div className="text-center py-8">Učitavanje...</div>;
 
   if (!tracks || tracks.length === 0) {
     return <div className="text-center py-8 text-gray-500">Nema dostupnih pesama.</div>;
   }
 
-  // Méret: 3 teljes cover, 4. részben látszik
-  // Pl. w-[calc(100vw/3.2)] vagy fix: w-64 (16rem)
-  // Mobilon: w-2/3, md: w-1/4
+  const { playSong, state } = useMusicPlayer();
 
+  // Méret: 3 teljes cover, 4. részben látszik
   const coverWidth = "w-[calc(100vw/3.2)] max-w-xs min-w-[8rem] aspect-square";
 
-  const handlePlay = (audio: string) => {
-    const audioEl = new Audio(audio);
-    audioEl.play();
-  };
+
+  // Teljes SongWithDetails dummy kitöltés
+  const toSongWithDetails = (track: Track, idx: number) => ({
+    id: idx.toString(),
+    title: track.displayName,
+    imageUrl: track.cover,
+    audioUrl: track.audio,
+    artist: {
+      id: "demo-artist",
+      name: "Unknown Artist",
+      imageUrl: null,
+      bio: null,
+      createdAt: null,
+    },
+    album: {
+      id: "demo-album",
+      title: "",
+      imageUrl: null,
+      createdAt: null,
+      artistId: "demo-artist",
+      releaseDate: null,
+      genre: null,
+    },
+    isLiked: false,
+    createdAt: null,
+    artistId: "demo-artist",
+    genre: null,
+    albumId: "demo-album",
+    duration: 0,
+    trackNumber: null,
+    playCount: null,
+    lastPlayed: null,
+  });
 
   return (
     <div className="flex flex-row space-x-4 overflow-x-scroll snap-x snap-mandatory py-4 px-2 bg-black">
@@ -57,17 +87,12 @@ export default function MusicGallery() {
           key={idx}
           className="flex flex-col items-center flex-shrink-0 snap-start cursor-pointer"
           style={{ width: 'calc(100vw / 3.2)', maxWidth: '16rem', minWidth: '8rem' }}
-          onClick={() => handlePlay(track.audio)}
+          onClick={() => playSong(toSongWithDetails(track, idx))}
         >
-          <img
-            src={track.cover}
-            alt={track.displayName}
-            className={`rounded object-cover aspect-square ${coverWidth}`}
-            loading="lazy"
+          <TrackItem
+            song={toSongWithDetails(track, idx)}
+            showEqualizer={true}
           />
-          <div className="mt-2 text-base text-white text-center font-medium truncate w-full">
-            {track.displayName}
-          </div>
         </div>
       ))}
     </div>
