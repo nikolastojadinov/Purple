@@ -12,16 +12,7 @@ export function getCurrentUserId(): string | null {
     return sessionId;
   }
   
-  // 2. Pi user data ako postoji
-  const piUserData = localStorage.getItem('pi-user');
-  if (piUserData) {
-    try {
-      const piUser = JSON.parse(piUserData);
-      return piUser.uid;
-    } catch {
-      // Ignore parse errors
-    }
-  }
+  // 2. Pi user data uklonjena
   
   // 3. Dugotrajni guest profil
   const persistentGuestId = localStorage.getItem('guest-profile-id');

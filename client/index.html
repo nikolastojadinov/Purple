@@ -9,45 +9,7 @@
 </head>
 <body>
   <div id="root"></div>
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  
-  <script>
-    // PurpleBeats Pi SDK initialization
-    (function () {
-      const currentDomain = window.location.hostname;
-      console.log("🎵 PurpleBeats initializing Pi SDK...");
-      console.log("🌐 Current domain:", currentDomain);
-
-      // Wait for Pi SDK to be available
-      function waitForPiSDK(callback, maxAttempts = 50) {
-        let attempts = 0;
-        
-        function checkPi() {
-          attempts++;
-          
-          if (typeof window.Pi !== 'undefined' && window.Pi && typeof window.Pi.init === 'function') {
-            console.log("✅ Pi SDK detected for PurpleBeats after", attempts, "attempts");
-            callback();
-            return;
-          }
-          
-          if (attempts >= maxAttempts) {
-            console.error("❌ Pi SDK failed to load for PurpleBeats");
-            return;
-          }
-          
-          console.log("⏳ Waiting for Pi SDK... attempt", attempts);
-          setTimeout(checkPi, 200);
-        }
-        
-        checkPi();
-      }
-
-      function initPurpleBeatsPi(appId) {
-        try {
-          // Determine environment
-          const isLocalhost = currentDomain.includes('localhost') || currentDomain.includes('127.0.0.1') || currentDomain.includes('replit');
-          const isDevelopment = isLocalhost || currentDomain.includes('replit') || currentDomain.includes('.app');
+  <!-- Pi SDK uklonjen -->
           
           const piConfig = {
             version: "2.0",

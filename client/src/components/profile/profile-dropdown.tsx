@@ -253,41 +253,7 @@ export default function ProfileDropdown({ userName, userAvatar, isPremium }: Pro
           {isPremium && <span className="ml-auto text-xs text-yellow-500">✨</span>}
         </DropdownMenuItem>
         
-        {/* Pi Network Login - samo za guest usere */}
-        {!isAuthenticated && isGuestUser && (
-          <>
-            <DropdownMenuSeparator />
-            <div
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("🚀 Starting Pi Network login...");
-                
-                try {
-                  await login();
-                  toast({
-                    title: "✅ Pi Login Successful!",
-                    description: "Welcome to PurpleBeats with Pi Network!",
-                  });
-                } catch (err: any) {
-                  console.error("❌ Pi login error:", err);
-                  toast({
-                    title: "❌ Pi Login Failed",
-                    description: err?.message || 'Unable to connect to Pi Network',
-                    variant: "destructive"
-                  });
-                }
-                setIsOpen(false);
-              }}
-              className="flex items-center space-x-3 p-3 cursor-pointer hover:bg-accent/10 text-primary font-semibold border border-yellow-400 rounded-md mx-2 my-1"
-              data-testid="menu-item-pi-login"
-              style={{ backgroundColor: 'rgba(234, 179, 8, 0.1)' }}
-            >
-              <Crown className="h-4 w-4 text-yellow-400" />
-              <span>🔥 LOGIN WITH Pi NETWORK</span>
-            </div>
-          </>
-        )}
+        {/* Pi Network login dugme uklonjeno, ostaje samo guest/premium logika */}
         
         <DropdownMenuSeparator />
       </DropdownMenuContent>

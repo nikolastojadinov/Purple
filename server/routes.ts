@@ -11,25 +11,7 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // ========================================
-  // Pi Network Configuration
-  // ========================================
-  
-  app.get("/api/pi-config", (req, res) => {
-    const appId = process.env.PI_APP_ID || "purplebeats5173";
-    const environment = process.env.PI_ENVIRONMENT || (process.env.NODE_ENV === 'production' ? 'production' : 'development');
-    
-    console.log('🔧 Providing PurpleBeats Pi config to frontend');
-    console.log('   APP_ID:', appId);
-    console.log('   ENVIRONMENT:', environment);
-    console.log('   PI_API_KEY:', process.env.PI_API_KEY ? 'CONFIGURED' : 'MISSING');
-    
-    res.json({
-      appId: appId,
-      environment: environment,
-      configured: !!process.env.PI_API_KEY
-    });
-  });
+  // Pi Network Configuration uklonjena
 
   // ========================================
   // Artists Routes

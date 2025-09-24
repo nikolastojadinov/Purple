@@ -125,11 +125,5 @@ app.use((req, res, next) => {
     () => log(`serving on port ${port}`)
   );
   
-  // FORCE development environment for Pi authentication
-  process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-  process.env.PI_SKIP_VERIFY = process.env.PI_SKIP_VERIFY || 'true';
-  
-  console.log("Server started with Pi API key:", process.env.PI_API_KEY ? "CONFIGURED" : "MISSING");
-  console.log("NODE_ENV:", process.env.NODE_ENV);
-  console.log("PI_SKIP_VERIFY:", process.env.PI_SKIP_VERIFY);
+  // Pi varijable uklonjene
 })();

@@ -80,11 +80,7 @@ export interface IStorage {
   updateMembership(userId: string, updates: Partial<Membership>): Promise<Membership | undefined>;
   getAllMemberships(): Promise<Membership[]>;
   
-  // Pi Payments
-  createPiPayment(payment: InsertPiPayment): Promise<PiPayment>;
-  getPiPayment(paymentId: string): Promise<PiPayment | undefined>;
-  updatePiPayment(paymentId: string, updates: Partial<PiPayment>): Promise<PiPayment | undefined>;
-  getPiPaymentsByUser(userId: string): Promise<PiPayment[]>;
+  // Pi Payments uklonjeni
   
   // Ambient Music
   generateAmbientForPlaylist(playlistId: string): Promise<AmbientMusicSetting>;
