@@ -7,7 +7,7 @@
 
 [build]
   command = "npm run build"
-  publish = "dist/public"
+  publish = "public"
 
 # Optional: Redirect all requests to index.html for SPA routing
 [[redirects]]
