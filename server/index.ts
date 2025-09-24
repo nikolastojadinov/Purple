@@ -63,10 +63,7 @@ app.use((req, res, next) => {
   const PUBLIC_DIR = path.join(ROOT, "public");
   const ASSETS_DIR = path.join(ROOT, "attached_assets");
 
-  // Serviraj sve fajlove iz public foldera (npr. validation-key.txt)
-  app.use(express.static(PUBLIC_DIR));
-  
-  // Serviraj slike iz attached_assets direktorijuma
+  // Serviraj slike iz attached_assets direktorijuma (safe for both dev and prod)
   app.use("/attached_assets", express.static(ASSETS_DIR));
 
   // Eksplicitno serviraj privacy i terms
@@ -97,7 +94,14 @@ app.use((req, res, next) => {
 
   // --- Development vs Production ---
   if (app.get("env") === "development") {
+    // In development, set up Vite first
     await setupVite(app, server);
+    
+    // Then serve public files (but Vite will handle index.html)
+    app.use("/validation-key.txt", express.static(path.join(PUBLIC_DIR, "validation-key.txt")));
+    app.use("/legal", express.static(path.join(PUBLIC_DIR, "legal")));
+    app.use("/privacy", express.static(path.join(PUBLIC_DIR, "privacy")));
+    app.use("/terms", express.static(path.join(PUBLIC_DIR, "terms")));  
   } else {
     // In production, serve the built client files from the correct location
     const clientDistPath = path.join(__dirname, "..", "public");

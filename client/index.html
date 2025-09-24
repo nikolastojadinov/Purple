@@ -9,7 +9,47 @@
 </head>
 <body>
   <div id="root"></div>
-  <!-- Pi SDK uklonjen -->
+  
+  <!-- Pi SDK Loading -->
+  <script src="https://sdk.minepi.com/pi-sdk.js" onerror="console.error('❌ Failed to load Pi SDK')"></script>
+  <script>
+    (function() {
+      console.log("🔄 PurpleBeats initializing Pi SDK...");
+      
+      // Check Pi Browser
+      const userAgent = navigator.userAgent || '';
+      const isPiBrowser = userAgent.includes('PiBrowser') || userAgent.includes('Pi Network');
+      console.log('🔍 User Agent:', userAgent);
+      console.log('🔍 Is Pi Browser:', isPiBrowser);
+      
+      if (!isPiBrowser) {
+        console.warn('⚠️ Not running in Pi Browser - some features may not work');
+      }
+
+      function waitForPiSDK(callback, attempts = 0) {
+        const maxAttempts = 50; // 5 seconds max
+        
+        if (attempts >= maxAttempts) {
+          console.error("❌ Pi SDK failed to load after maximum attempts");
+          return;
+        }
+        
+        if (typeof window !== 'undefined' && window.Pi) {
+          console.log("✅ Pi SDK loaded successfully");
+          callback();
+        } else {
+          setTimeout(() => waitForPiSDK(callback, attempts + 1), 100);
+        }
+      }
+
+      function initPurpleBeatsPi(appId) {
+        try {
+          if (!window.Pi) {
+            throw new Error("Pi SDK not available");
+          }
+          
+          const currentDomain = window.location.hostname;
+          const isDevelopment = currentDomain === 'localhost' || currentDomain.includes('127.0.0.1');
           
           const piConfig = {
             version: "2.0",
@@ -17,16 +57,13 @@
             appId: appId
           };
           
-          console.log("🔧 Initializing PurpleBeats Pi SDK with config:", piConfig);
+          console.log("🔧 Initializing PurpleBeats Pi SDK:", piConfig);
           console.log("🔧 Domain:", currentDomain, "isDevelopment:", isDevelopment);
-          console.log("🔧 Sandbox mode (testnet):", piConfig.sandbox);
           
           window.Pi.init(piConfig);
           window.Pi.initialized = true;
           
           console.log("✅ PurpleBeats Pi SDK initialized successfully");
-          console.log("🎯 Pi SDK ready for PurpleBeats authentication and payments");
-          console.log("💰 Payment mode: TESTNET (sandbox: true)");
           
           // Add Pi methods to global scope for easy access
           window.PurpleBeats = {
@@ -49,32 +86,36 @@
         }
       }
 
-      // Fetch config and initialize
+      // Fetch config and initialize Pi SDK
       fetch("/api/pi-config")
         .then((res) => {
           console.log("📡 PurpleBeats Pi config status:", res.status);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) {
+            // Don't throw error - app should still work without Pi SDK
+            console.warn(`⚠️ Pi config failed with status ${res.status}`);
+            return null;
+          }
           return res.json();
         })
         .then((config) => {
-          const appId = config && config.appId;
-          console.log("🔧 PurpleBeats Pi Config received:", config);
-          
-          if (!appId) {
-            throw new Error("Missing appId in Pi config for PurpleBeats");
+          if (config && config.appId) {
+            console.log("🔧 PurpleBeats Pi Config received:", config);
+            
+            // Wait for Pi SDK then initialize
+            waitForPiSDK(() => {
+              initPurpleBeatsPi(config.appId);
+            });
+          } else {
+            console.warn("⚠️ No valid Pi config received - app will work with limited functionality");
           }
-          
-          // Wait for Pi SDK then initialize
-          waitForPiSDK(() => {
-            initPurpleBeatsPi(appId);
-          });
         })
         .catch((err) => {
-          console.error("❌ PurpleBeats Pi config failed:", err);
+          console.warn("⚠️ PurpleBeats Pi config failed:", err);
+          console.log("ℹ️ App will continue without Pi SDK functionality");
         });
     })();
   </script>
   
-  <script type="module" src="/src/main.jsx"></script>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
